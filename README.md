@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="Thermato/icon/thermato.png" alt="THERMATO Logo" width="220"/>
+  <img src="/Thermato/icon/thermato.png" alt="THERMATO Logo" width="220"/>
   <h1>THERMATO</h1>
   <h3>Urban Heat Risk Analysis — QGIS Plugin</h3>
 
