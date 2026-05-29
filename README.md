@@ -28,7 +28,6 @@
 - [Component Default Scores](#component-default-scores)
 - [Methodology](#methodology)
 - [Requirements](#requirements)
-- [Installation](#installation)
 - [Authors](#authors)
 
 ---
@@ -217,17 +216,6 @@ Each component is reclassified pixel-by-pixel using user-defined or default brea
 - **NumPy** (bundled with QGIS)
 
 No additional Python packages required.
-
----
-
-## Installation
-
-1. Download or clone this repository
-2. Copy the plugin folder into your QGIS plugins directory:
-   - **Windows:** `C:\Users\<user>\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\`
-   - **Linux/macOS:** `~/.local/share/QGIS/QGIS3/profiles/default/python/plugins/`
-3. Open QGIS → **Plugins** → **Manage and Install Plugins** → **Installed** → enable **THERMATO**
-4. The tool appears under **Processing Toolbox → THERMATO → Urban Heat Risk Analysis**
 
 ---
 
