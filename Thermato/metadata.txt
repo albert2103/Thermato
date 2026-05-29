@@ -1,0 +1,47 @@
+# This file contains metadata for your plugin.
+
+# This file should be included when you package your plugin.# Mandatory items:
+
+[general]
+name=THERMATO (Thermal Risk Mapping and Analysis Tool)
+qgisMinimumVersion=3.0
+description=This plugin analyzes the correlation between heat exposure risk, land surface characteristics, and socio-economic vulnerability, and provides automated spatial estimation of urban heat risk patterns.
+version=0.1
+author=​Hifzhan Zhafir Faza, ​M. Titus Gideon, ​Prasasta Adhitya Gunawan, ​Muhammad Ar Rayyan R, ​Rafi Dwi Nugroho 
+email=garudajaya45@gmail.com
+
+about=THERMATO integrates land surface temperature (LST), vegetation cover (NDVI), built-up intensity (NDBI), and demographic indicators to model urban heat risk automatically. This plugin provides classified heat risk maps and zonal statistics, enabling rapid assessment of hazard, socio-economic vulnerability, and adaptive capacity. By linking satellite-derived thermal conditions with population distribution and land cover change, THERMATO reveals how urban expansion and reduced vegetation intensify local heat exposure. Designed for climate risk analysts and urban planning agencies, it supports evidence-based decision making and prioritization of high-risk thermal zones.
+
+tracker=http://bugs
+repository=http://repo
+# End of mandatory metadata
+
+# Recommended items:
+
+hasProcessingProvider=no
+# Uncomment the following line and add your changelog:
+# changelog=
+
+# Tags are comma separated with spaces allowed
+tags=heat-risk, land-surface-temperature, NDVI, NDBI, socio-economic vulnerability, urban-heat-island, climate-exposure, spatial-modeling, risk-assessment
+
+homepage=http://homepage
+category=Plugins
+icon=icon.png
+# experimental flag
+experimental=False
+
+# deprecated flag (applies to the whole plugin, not just a single version)
+deprecated=False
+
+# Since QGIS 3.8, a comma separated list of plugins to be installed
+# (or upgraded) can be specified.
+# Check the documentation for more information.
+# plugin_dependencies=
+
+Category of the plugin: Raster, Vector, Database or Web
+# category=
+
+# If the plugin can run on QGIS Server.
+server=False
+

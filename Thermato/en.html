@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="description" content="THERMATO QGIS Plugin Help Documentation" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>THERMATO – Help Documentation</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #e05a2b;
+      --primary-dark: #b8421a;
+      --dark: #1e1e2e;
+      --dark2: #2a2a3e;
+      --light: #f7f7fb;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --code-bg: #1e1e2e;
+      --nav-width: 260px;
+      --header-h: 64px;
+    }
+
+    body {
+      font-family: 'Nunito Sans', sans-serif;
+      font-size: 15px;
+      color: #333;
+      background: var(--light);
+      line-height: 1.7;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--header-h);
+      background: var(--dark);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,.35);
+    }
+
+    .logo {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo__icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      background: var(--primary);
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    .logo__thin { font-weight: 300; color: #aaa; }
+
+    .menu { list-style: none; display: flex; align-items: center; gap: 20px; }
+    .menu a { text-decoration: none; color: #ccc; font-size: 0.85rem; font-weight: 700;
+               letter-spacing: .5px; transition: color .2s; display: flex; align-items: center; gap: 6px; }
+    .menu a:hover { color: var(--primary); }
+
+    /* ── LAYOUT ── */
+    .wrapper {
+      display: flex;
+      padding-top: var(--header-h);
+      min-height: 100vh;
+    }
+
+    /* ── SIDEBAR ── */
+    .doc__nav {
+      position: fixed;
+      top: var(--header-h);
+      left: 0;
+      width: var(--nav-width);
+      height: calc(100vh - var(--header-h));
+      background: var(--dark2);
+      overflow-y: auto;
+      padding: 28px 0 40px;
+      border-right: 1px solid rgba(255,255,255,.06);
+    }
+
+    .doc__nav h4 {
+      color: #888;
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 0 24px 12px;
+      font-weight: 700;
+    }
+
+    .doc__nav ul { list-style: none; }
+    .doc__nav li { padding: 0; }
+
+    .doc__nav li a,
+    .nav-link {
+      display: block;
+      padding: 9px 24px;
+      color: #bbb;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: all .18s;
+      border-left: 3px solid transparent;
+      cursor: pointer;
+    }
+
+    .doc__nav li a:hover,
+    .nav-link:hover,
+    .nav-link.active {
+      color: #fff;
+      background: rgba(224, 90, 43, 0.12);
+      border-left-color: var(--primary);
+    }
+
+    .nav-sub {
+      padding: 6px 24px 6px 36px;
+      color: #999;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: block;
+      text-decoration: none;
+      transition: color .18s;
+      cursor: pointer;
+    }
+    .nav-sub:hover { color: #fff; }
+
+    /* ── CONTENT ── */
+    .doc__content {
+      margin-left: var(--nav-width);
+      flex: 1;
+      padding: 48px 56px 80px;
+      max-width: 960px;
+    }
+
+    /* ── INTRO BANNER ── */
+    .intro-banner {
+      background: linear-gradient(135deg, var(--dark) 0%, #3a1a0a 100%);
+      border-radius: 16px;
+      padding: 40px 44px;
+      margin-bottom: 48px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .intro-banner::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 220px; height: 220px;
+      border-radius: 50%;
+      background: rgba(224,90,43,.18);
+    }
+
+    .intro-banner h2 {
+      font-size: 1.9rem;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 14px;
+      line-height: 1.2;
+    }
+
+    .intro-banner h2 span { color: var(--primary); }
+    .intro-banner p { color: #ccc; font-size: 0.97rem; max-width: 680px; line-height: 1.75; }
+
+    .badge {
+      display: inline-block;
+      background: var(--primary);
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-bottom: 14px;
+    }
+
+    /* ── SECTIONS ── */
+    .section {
+      margin-bottom: 56px;
+      scroll-margin-top: 80px;
+    }
+
+    .section__title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--dark);
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section__title .icon {
+      display: inline-flex;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--primary);
+      color: #fff;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .sub__title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin: 28px 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sub__title::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 18px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+
+    p { margin-bottom: 12px; color: #444; }
+
+    /* ── BLOCK LABEL ── */
+    .block-label {
+      display: inline-block;
+      font-weight: 800;
+      font-size: 0.75rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 6px;
+      margin: 20px 0 10px;
+    }
+
+    .block-label--param  { background: #fff0eb; color: var(--primary); border: 1px solid #ffd0be; }
+    .block-label--output { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+
+    /* ── TABLE ── */
+    .table-wrap { overflow-x: auto; margin-bottom: 20px; border-radius: 10px; box-shadow: 0 1px 6px rgba(0,0,0,.08); }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+
+    thead { background: var(--dark); color: #fff; }
+
+    thead th {
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 0.8rem;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+
+    thead th:first-child { border-radius: 10px 0 0 0; }
+    thead th:last-child  { border-radius: 0 10px 0 0; }
+
+    tbody tr { border-bottom: 1px solid var(--border); }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:nth-child(even) { background: #f9f9fc; }
+    tbody tr:hover { background: #fff5f1; }
+
+    td { padding: 12px 16px; vertical-align: top; color: #444; }
+    td strong { color: var(--dark); }
+
+    code {
+      background: #f3f4f6;
+      color: #374151;
+      font-size: 0.82rem;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .badge-optional {
+      display: inline-block;
+      background: #f3f4f6;
+      color: #6b7280;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: 10px;
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+
+    .tag-raster, .tag-vector, .tag-table, .tag-folder, .tag-txt {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+      white-space: nowrap;
+    }
+    .tag-raster  { background: #e3f2fd; color: #1565c0; }
+    .tag-vector  { background: #e8f5e9; color: #2e7d32; }
+    .tag-table   { background: #fff8e1; color: #f57f17; }
+    .tag-folder  { background: #ede7f6; color: #512da8; }
+    .tag-txt     { background: #f3f4f6; color: #374151; }
+
+    /* ── INFOBOX ── */
+    .infobox {
+      background: #fff7f5;
+      border-left: 4px solid var(--primary);
+      border-radius: 0 8px 8px 0;
+      padding: 16px 20px;
+      margin: 16px 0 24px;
+      color: #555;
+      font-size: 0.9rem;
+    }
+
+    .infobox strong { color: var(--primary-dark); }
+
+    /* ── DIVIDER ── */
+    hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+    /* ── FORMULA BOX ── */
+    .formula-box {
+      background: var(--code-bg);
+      color: #f8f8f2;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 16px 0 24px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      overflow-x: auto;
+      line-height: 1.8;
+    }
+
+    .formula-box .var     { color: #ff79c6; }
+    .formula-box .op      { color: #50fa7b; }
+    .formula-box .comment { color: #6272a4; font-style: italic; }
+
+    /* ── FOOTER ── */
+    .footer {
+      background: var(--dark);
+      color: #888;
+      text-align: center;
+      padding: 28px 24px;
+      font-size: 0.82rem;
+      margin-left: var(--nav-width);
+    }
+
+    .footer a { color: var(--primary); text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+
+    /* ── SCROLLBAR ── */
+    .doc__nav::-webkit-scrollbar { width: 4px; }
+    .doc__nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 4px; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .doc__nav { display: none; }
+      .doc__content { margin-left: 0; padding: 24px 20px 60px; }
+      .footer { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<nav class="header">
+  <div class="logo">
+    <span class="logo__icon"><i class="fa fa-thermometer-half"></i></span>
+    THERMATO <span class="logo__thin">Help</span>
+  </div>
+  <ul class="menu">
+    <li><a href="https://github.com" target="_blank"><i class="fa fa-github"></i> GitHub</a></li>
+  </ul>
+</nav>
+
+<div class="wrapper">
+
+  <!-- SIDEBAR -->
+  <aside class="doc__nav">
+    <h4>Contents</h4>
+    <ul>
+      <li><a class="nav-link" onclick="navTo('overview', this)">Overview</a></li>
+      <li><a class="nav-link" onclick="navTo('parameters', this)">Parameters</a></li>
+      <li><a class="nav-link" onclick="navTo('outputs', this)">Outputs</a></li>
+      <li><a class="nav-link" onclick="navTo('indices', this)">Index Descriptions</a>
+        <a class="nav-sub" onclick="navTo('lst', this)">&#8627; LST</a>
+        <a class="nav-sub" onclick="navTo('ndbi', this)">&#8627; NDBI</a>
+        <a class="nav-sub" onclick="navTo('ndvi', this)">&#8627; NDVI</a>
+        <a class="nav-sub" onclick="navTo('popdensity', this)">&#8627; Population Density</a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <article class="doc__content">
+
+    <!-- INTRO BANNER -->
+    <div class="intro-banner">
+      <span class="badge">QGIS Plugin</span>
+      <h2>Help &#8211; User Guide for <span>THERMATO</span></h2>
+      <p>
+        THERMATO is a QGIS plugin developed to support <strong style="color:#ff9a6c">heat exposure risk
+        analysis and mapping</strong> based on remote sensing data. This plugin is designed to help users
+        determine the impact of heat exposure on socioeconomic data, calculate measurable heat exposure
+        impact risk indices, and automatically generate standardized heat risk classification maps.
+      </p>
+    </div>
+
+    <!-- OVERVIEW -->
+    <section class="section" id="overview">
+      <h3 class="section__title">
+        <span class="icon"><i class="fa fa-info"></i></span>
+        Overview
+      </h3>
+      <p>
+        THERMATO integrates multiple remote sensing indices &#8212; LST, NDBI, and NDVI &#8212; together
+        with population density data to compute an Urban Heat Risk index for a given area. The plugin
+        automates the full analysis pipeline: from raster input ingestion and classification, through
+        user-defined component weighting, to final heat risk raster and vector outputs along with a
+        detailed report log.
+      </p>
+      <div class="infobox">
+        <strong>Key capability:</strong> Users can supply custom classification tables and manually
+        define component weights (totalling 100%), enabling flexible adaptation to local study areas
+        and policy frameworks.
+      </div>
+    </section>
+
+    <!-- PARAMETERS -->
+    <section class="section" id="parameters">
+      <h3 class="section__title">
+        <span class="icon"><i class="fa fa-sliders"></i></span>
+        Parameters
+      </h3>
+      <p>The following table lists all input parameters accepted by the THERMATO plugin.</p>
+
+      <span class="block-label block-label--param">Parameter</span>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Label</th>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>LST Layer</strong></td>
+              <td>Input</td>
+              <td><span class="tag-raster">Raster</span></td>
+              <td>Satellite images that cover/display Earth's surface temperature data. These images can be obtained from open-source satellites such as Landsat 8 and MODIS, etc.</td>
+            </tr>
+            <tr>
+              <td><strong>LST Classification Table</strong> <span class="badge-optional">optional</span></td>
+              <td>Vector Table</td>
+              <td><span class="tag-table">Table</span></td>
+              <td>Classification of LST data into several values that will be operated on later in the Urban Heat Risk Weighting Expression.</td>
+            </tr>
+            <tr>
+              <td><strong>NDBI Layer</strong></td>
+              <td>Input</td>
+              <td><span class="tag-raster">Raster</span></td>
+              <td>Spatial index specifically designed to automatically detect, extract, and highlight built-up areas or man-made infrastructure.</td>
+            </tr>
+            <tr>
+              <td><strong>NDBI Classification Table</strong> <span class="badge-optional">optional</span></td>
+              <td>Vector Table</td>
+              <td><span class="tag-table">Table</span></td>
+              <td>Classification of NDBI data into several values that will be operated on later in the Urban Heat Risk Weighting Expression.</td>
+            </tr>
+            <tr>
+              <td><strong>NDVI Layer</strong></td>
+              <td>Input</td>
+              <td><span class="tag-raster">Raster</span></td>
+              <td>Index for measuring the greenness, density, and health of vegetation in an area.</td>
+            </tr>
+            <tr>
+              <td><strong>NDVI Classification Table</strong> <span class="badge-optional">optional</span></td>
+              <td>Vector Table</td>
+              <td><span class="tag-table">Table</span></td>
+              <td>Classification of NDVI data into several values that will be operated on later in the Urban Heat Risk Weighting Expression.</td>
+            </tr>
+            <tr>
+              <td><strong>Population Density Layer (people/km&#178;)</strong></td>
+              <td>Input</td>
+              <td><span class="tag-raster">Raster</span></td>
+              <td>A raster dataset representing the spatial distribution of population density, expressed in people per square kilometer (people/km&#178;). Each pixel contains the estimated number of people per unit area, which is used to assess human exposure and vulnerability in urban heat risk analysis. This data can be obtained using WorldPop.</td>
+            </tr>
+            <tr>
+              <td><strong>Population Density Classification Table</strong> <span class="badge-optional">optional</span></td>
+              <td>Vector Table</td>
+              <td><span class="tag-table">Table</span></td>
+              <td>Population density data in shapefile format, obtainable from local government statistical agencies or other sources. This data will be overlaid with LST, NDVI, and NDBI data.</td>
+            </tr>
+            <tr>
+              <td><strong>Component Weights</strong></td>
+              <td>Table</td>
+              <td><span class="tag-table">Table</span></td>
+              <td>Manual weighting assigned by the user for each input component. The total weight across all components must equal <strong>100%</strong>.</td>
+            </tr>
+            <tr>
+              <td><strong>Manual Classification Breaks</strong></td>
+              <td>Table</td>
+              <td><span class="tag-table">Table</span></td>
+              <td>Classification of the final results by rounding continuous data into discrete values (e.g., 1.5 becomes 2).</td>
+            </tr>
+            <tr>
+              <td><strong>Output Folder</strong></td>
+              <td>Folder</td>
+              <td><span class="tag-folder">Folder</span></td>
+              <td>Select the destination folder where all final result files will be saved.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- OUTPUTS -->
+    <section class="section" id="outputs">
+      <h3 class="section__title">
+        <span class="icon"><i class="fa fa-map"></i></span>
+        Outputs
+      </h3>
+      <p>THERMATO produces three output types upon successful execution.</p>
+
+      <span class="block-label block-label--output">Output</span>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Label</th>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Heat Risk Raster Output</strong></td>
+              <td>Output</td>
+              <td><span class="tag-raster">Raster</span></td>
+              <td>Heat risk calculated by overlaying raster-formatted input layers.</td>
+            </tr>
+            <tr>
+              <td><strong>Heat Risk Vector Output</strong></td>
+              <td>Output</td>
+              <td><span class="tag-vector">Vector</span></td>
+              <td>Heat risk calculated by overlaying vector-formatted input layers.</td>
+            </tr>
+            <tr>
+              <td><strong>Report Log</strong></td>
+              <td>Output</td>
+              <td><span class="tag-txt">Txt</span></td>
+              <td>
+                A text log folder containing the following output files:<br/><br/>
+                <code>classification_rules.txt</code><br/>
+                <code>high_risk_coords.csv</code><br/>
+                <code>report.html</code><br/>
+                <code>resampling_log.txt</code><br/>
+                <code>summary.txt</code>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- INDEX DESCRIPTIONS -->
+    <section class="section" id="indices">
+      <h3 class="section__title">
+        <span class="icon"><i class="fa fa-bar-chart"></i></span>
+        Index Descriptions
+      </h3>
+      <p>THERMATO relies on four key spatial indices. Below is a detailed explanation of each.</p>
+
+      <hr/>
+
+      <!-- LST -->
+      <div id="lst" style="scroll-margin-top: 80px;">
+        <h4 class="sub__title">LST &#8211; Land Surface Temperature</h4>
+        <p>
+          LST refers to satellite images that cover and display Earth's surface temperature data.
+          It is a critical indicator of urban heat island effects and thermal environments.
+          LST data can be obtained from open-source satellite missions such as <strong>Landsat 8</strong>
+          and <strong>MODIS</strong>.
+        </p>
+        <div class="infobox">
+          <strong>Note:</strong> Higher LST values in densely built-up areas with low vegetation coverage
+          indicate elevated heat stress risk for the populations living in those zones.
+        </div>
+      </div>
+
+      <hr/>
+
+      <!-- NDBI -->
+      <div id="ndbi" style="scroll-margin-top: 80px;">
+        <h4 class="sub__title">NDBI &#8211; Normalized Difference Built-up Index</h4>
+        <p>
+          NDBI is a spatial index specifically designed to automatically detect, extract, and highlight
+          built-up areas or human-made infrastructure. This index operates by leveraging the physical
+          characteristics of hard construction materials such as concrete and asphalt, which reflect
+          <strong>Short-Wave Infrared (SWIR)</strong> waves much more strongly than
+          <strong>Near-Infrared (NIR)</strong> waves.
+        </p>
+        <div class="formula-box">
+          <span class="var">NDBI</span> <span class="op">=</span> (SWIR &#8722; NIR) / (SWIR + NIR)
+          <br/>
+          <span class="comment">// Range: -1.0 to +1.0</span>
+        </div>
+        <div class="infobox">
+          <strong>Interpretation:</strong><br/>
+          &#8226; <strong>Negative values</strong> &#8594; presence of water bodies or vegetation cover<br/>
+          &#8226; <strong>Positive values (&#8594; 1.0)</strong> &#8594; built-up areas or impervious surfaces; higher values represent denser and more massive urban density
+        </div>
+      </div>
+
+      <hr/>
+
+      <!-- NDVI -->
+      <div id="ndvi" style="scroll-margin-top: 80px;">
+        <h4 class="sub__title">NDVI &#8211; Normalized Difference Vegetation Index</h4>
+        <p>
+          NDVI is an index used to measure the greenness, density, and health of vegetation in a given area.
+          It operates by comparing the reflectance of <strong>red light</strong> waves &#8212; which are absorbed
+          by plant chlorophyll for photosynthesis &#8212; with <strong>Near-Infrared (NIR)</strong> waves, which
+          are strongly reflected by healthy leaf structures.
+        </p>
+        <div class="formula-box">
+          <span class="var">NDVI</span> <span class="op">=</span> (NIR &#8722; Red) / (NIR + Red)
+          <br/>
+          <span class="comment">// Range: -1.0 to +1.0</span>
+        </div>
+        <div class="infobox">
+          <strong>Interpretation:</strong><br/>
+          &#8226; <strong>Negative values</strong> &#8594; non-vegetated elements such as water bodies or clouds<br/>
+          &#8226; <strong>Values close to zero</strong> &#8594; bare soil or asphalt roads<br/>
+          &#8226; <strong>Positive values (&#8594; 1.0)</strong> &#8594; increasingly dense and healthy vegetation cover, such as forest canopies
+        </div>
+      </div>
+
+      <hr/>
+
+      <!-- Population Density -->
+      <div id="popdensity" style="scroll-margin-top: 80px;">
+        <h4 class="sub__title">Population Density</h4>
+        <p>
+          Population density is a demographic and spatial measure that quantifies the number of people
+          living per unit of land area (typically expressed as people per square kilometer or square mile).
+          In spatial analysis and urban planning, this metric is crucial for assessing human settlement
+          patterns, resource distribution, and infrastructure demand.
+        </p>
+        <p>
+          When integrated with remote sensing data like NDVI and NDBI, population density helps evaluate
+          the relationship between human overcrowding and environmental impacts &#8212; such as the
+          <strong>Urban Heat Island (UHI)</strong> effect, where areas with high built-up index values
+          and high population density generally experience higher thermal risks.
+        </p>
+        <div class="infobox">
+          <strong>Data source:</strong> Population density raster data is recommended to be sourced from
+          <strong>WorldPop</strong> or from local government statistical agencies.
+        </div>
+      </div>
+
+    </section>
+
+  </article>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  THERMATO QGIS Plugin Help Documentation &#8212; Heat Exposure Risk Analysis Tool.
+  <a href="https://github.com" target="_blank">Source Code</a>.
+</footer>
+
+<script>
+  function navTo(id, el) {
+    const target = document.getElementById(id);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    // activate the closest nav-link ancestor or self
+    let link = el;
+    if (!link.classList.contains('nav-link')) {
+      link = el.closest('li') && el.closest('li').querySelector('.nav-link');
+    }
+    if (link) link.classList.add('active');
+  }
+
+  // Highlight active nav on scroll
+  const navIds = ['overview', 'parameters', 'outputs', 'indices', 'lst', 'ndbi', 'ndvi', 'popdensity'];
+  window.addEventListener('scroll', () => {
+    let current = '';
+    navIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && window.scrollY >= el.offsetTop - 100) current = id;
+    });
+    document.querySelectorAll('.nav-link').forEach(l => {
+      l.classList.remove('active');
+      const fn = l.getAttribute('onclick') || '';
+      if (fn.includes("'" + current + "'")) l.classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>
