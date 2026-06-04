@@ -6,14 +6,16 @@
 name=THERMATO (Thermal Risk Mapping and Analysis Tool)
 qgisMinimumVersion=3.0
 description=This plugin analyzes the correlation between heat exposure risk, land surface characteristics, and socio-economic vulnerability, and provides automated spatial estimation of urban heat risk patterns.
-version=0.1
-author=​Hifzhan Zhafir Faza, ​M. Titus Gideon, ​Prasasta Adhitya Gunawan, ​Muhammad Ar Rayyan R, ​Rafi Dwi Nugroho 
-email=garudajaya45@gmail.com
+version=1.0
+author=​Prof.Dr. Albertus Deliar, S.T., M.T., Prof. Ir. Ketut Wikantika, M.Eng, Ph.D., 
+       Dr. Alfita Puspa Handayani, S.T., M.T., Hifzhan Zhafir Faza, M. Titus Gideon,
+       Prasasta Adhitya Gunawan, Muhammad Ar Rayyan Ramadhani, Rafi Dwi Nugroho
+email=albertus.deliar@gmail.com
 
 about=THERMATO integrates land surface temperature (LST), vegetation cover (NDVI), built-up intensity (NDBI), and demographic indicators to model urban heat risk automatically. This plugin provides classified heat risk maps and zonal statistics, enabling rapid assessment of hazard, socio-economic vulnerability, and adaptive capacity. By linking satellite-derived thermal conditions with population distribution and land cover change, THERMATO reveals how urban expansion and reduced vegetation intensify local heat exposure. Designed for climate risk analysts and urban planning agencies, it supports evidence-based decision making and prioritization of high-risk thermal zones.
 
-tracker=http://bugs
-repository=http://repo
+tracker=https://github.com/albert2103/Thermato/issues
+repository=https://github.com/albert2103/Thermato/tree/main/Thermato
 # End of mandatory metadata
 
 # Recommended items:
@@ -25,7 +27,7 @@ hasProcessingProvider=no
 # Tags are comma separated with spaces allowed
 tags=heat-risk, land-surface-temperature, NDVI, NDBI, socio-economic vulnerability, urban-heat-island, climate-exposure, spatial-modeling, risk-assessment
 
-homepage=http://homepage
+homepage=https://github.com/albert2103/Thermato
 category=Plugins
 icon=icon.png
 # experimental flag
