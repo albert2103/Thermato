@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 /***************************************************************************
  Thermato
@@ -23,7 +24,46 @@ __copyright__ = ('(C) 2026 by Prof.Dr. Albertus Deliar, S.T., M.T., Prof. Ir. Ke
                 'Dr. Alfita Puspa Handayani, S.T., M.T., Hifzhan Zhafir Faza, M. Titus Gideon, '
                 'Prasasta Adhitya Gunawan, Muhammad Ar Rayyan Ramadhani, Rafi Dwi Nugroho')
 
-# noinspection PyPep8Naming
-def classFactory(iface):
-    from .thermato import TherMatoPlugin
-    return TherMatoPlugin(iface)
+import os
+import processing
+
+from qgis.core import QgsApplication
+from qgis.PyQt.QtWidgets import QAction
+from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtCore import QCoreApplication
+
+from .thermato_provider import ThermatoProvider
+
+
+class TherMatoPlugin:
+
+    def __init__(self, iface):
+        self.iface = iface
+        self.provider = None
+        self.action = None
+
+    def tr(self, message):
+        return QCoreApplication.translate('THERMATO', message)
+
+    def initGui(self):
+        # Register Processing provider
+        self.initProcessing()
+
+        # Add menu entry
+        self.action = QAction("THERMATO", self.iface.mainWindow())
+        self.action.triggered.connect(self.run)
+        #self.iface.addPluginToMenu("&THERMATO", self.action)
+
+    def initProcessing(self):
+        self.provider = ThermatoProvider()
+        QgsApplication.processingRegistry().addProvider(self.provider)
+
+    def unload(self):
+        if self.provider:
+            QgsApplication.processingRegistry().removeProvider(self.provider)
+
+        #if self.action:
+        #    self.iface.removePluginMenu("&THERMATO", self.action)
+
+    def run(self):
+        processing.execAlgorithmDialog('thermato:thermato')
