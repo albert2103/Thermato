@@ -299,7 +299,7 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
             '&nbsp;&nbsp;&nbsp;&nbsp;risk_class, risk_label, risk_color, area_m2, area_ha<br><br>'
             '<b>report/</b><br>'
             '&nbsp;&nbsp;report.html - Full HTML analysis report<br>'
-            '&nbsp;&nbsp;high_risk_coords.csv - Class 5 pixel coordinates<br>'
+            '&nbsp;&nbsp;high_risk_coords.csv - High risk pixel coordinates<br>'
             '&nbsp;&nbsp;summary.txt - Quick statistics summary<br>'
             '&nbsp;&nbsp;classification_rules.txt - Applied rules documentation<br>'
             '&nbsp;&nbsp;resampling_log.txt - Auto-resampling operations log'
@@ -801,7 +801,7 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
                 cat_names[cls_val] = f'Class {cls_val}'
         band.SetCategoryNames(cat_names)
         
-        # ── Write pixel data (setelah color table) ──
+        # ── Write pixel data (after color table) ──
         out = np.where(np.isnan(arr), 0, arr).astype(np.float32)
         valid_set = set(all_cls_vals)
         out_int = out.astype(np.uint8)
@@ -1357,7 +1357,7 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
         n_cls = len(all_cls_vals)
 
         cls_rows = ''
-        for cls in all_cls_vals:  # ← loop all_cls_vals bukan 1-5
+        for cls in all_cls_vals:  # ← iterate all actual class values, not hardcoded 1-5
             cnt = class_stats.get(cls, 0)
             pct = 100 * cnt / total_valid if total_valid else 0
             bar = '█' * int(pct / 2)
@@ -1566,7 +1566,7 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
           <td>Polygon with risk_class, risk_label, risk_color, area_m2, area_ha</td></tr>
       <tr><td>report/</td><td>report.html</td><td>This report</td></tr>
       <tr><td>report/</td><td>high_risk_coords.csv</td>
-          <td>Class 5 pixel coordinates</td></tr>
+          <td>f"Class {max_cls_val} pixel coordinates"</td></tr>
       <tr><td>report/</td><td>summary.txt</td><td>Quick statistics</td></tr>
       <tr><td>report/</td><td>classification_rules.txt</td>
           <td>Applied classification rules</td></tr>
