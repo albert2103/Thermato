@@ -52,7 +52,6 @@ class TherMatoPlugin:
         # Add menu entry
         self.action = QAction("THERMATO", self.iface.mainWindow())
         self.action.triggered.connect(self.run)
-        #self.iface.addPluginToMenu("&THERMATO", self.action)
 
     def initProcessing(self):
         self.provider = ThermatoProvider()
@@ -62,8 +61,6 @@ class TherMatoPlugin:
         if self.provider:
             QgsApplication.processingRegistry().removeProvider(self.provider)
 
-        #if self.action:
-        #    self.iface.removePluginMenu("&THERMATO", self.action)
 
     def run(self):
         processing.execAlgorithmDialog('thermato:thermato')
