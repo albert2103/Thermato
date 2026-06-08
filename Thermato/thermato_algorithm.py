@@ -99,7 +99,7 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
     def shortHelpString(self):
         return """
         <p>Integrates <b>LST · NDBI · NDVI · Population Density</b> with
-        automatic resampling and strict validation.</p>
+        automatic resampling and strict varification.</p>
 
         <p><b>⚠ LST is the reference grid and CRS.</b> All other layers are automatically 
         resampled and reprojected to match LST resolution, extent, and coordinate system. 
@@ -240,7 +240,7 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
             optional=False
         )
         p.setHelp(
-            '<b>STRICT VALIDATION</b> - total must equal exactly 100.0%<br>'
+            '<b>STRICT VERIFICATION</b> - total must equal exactly 100.0%<br>'
             'Tolerance: +/-0.1% (99.9%-100.1% accepted)<br>'
             'No auto-normalization for transparency.<br><br>'
             '<b>Recommended ranges (literature):</b><br>'
@@ -348,7 +348,7 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
     def processAlgorithm(self, parameters, context, feedback):
         feedback.pushInfo('=' * 70)
         feedback.pushInfo('  THERMATO - Heat Risk Analysis')
-        feedback.pushInfo('  Auto-resampling | Strict validation | Single output folder')
+        feedback.pushInfo('  Auto-resampling | Strict verification | Single output folder')
         feedback.pushInfo('=' * 70)
         feedback.setProgress(0)
 
@@ -388,26 +388,26 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
             feedback.pushInfo(f'  Vector        : {vector_dir}')
             feedback.pushInfo(f'  Report        : {report_dir}')
 
-            # ── Parse & validate rules ──
+            # ── Parse & verify rules ──
             feedback.pushInfo('\n[VAL] Parsing classification tables...')
             rules = self._parse_all_tables(tables, feedback)
             feedback.setProgress(5)
 
-            # ── Weight validation ──
-            feedback.pushInfo('\n[VAL] Validating weights (strict 100%)...')
-            weights = self._validate_weights_strict(weight_raw, feedback)
+            # ── Weight verification ──
+            feedback.pushInfo('\n[VAL] Verifying weights (strict 100%)...')
+            weights = self._verify_weights_strict(weight_raw, feedback)
             expr    = self._build_expression(weights)
             feedback.pushInfo(f'  Formula: {expr}')
             feedback.setProgress(10)
 
             # ── Score range consistency ──
-            feedback.pushInfo('\n[VAL] Validating score range consistency...')
-            self._validate_score_consistency(rules, feedback)
+            feedback.pushInfo('\n[VAL] Verifying score range consistency...')
+            self._verify_score_consistency(rules, feedback)
             feedback.setProgress(15)
 
-            # ── Basic raster validation ──
-            feedback.pushInfo('\n[VAL] Basic raster validation + CRS audit...')
-            crs_report = self._validate_raster_basics(rasters, feedback)
+            # ── Basic raster verification ──
+            feedback.pushInfo('\n[VAL] Basic raster verification + CRS audit...')
+            crs_report = self._verification_raster_basics(rasters, feedback)
             feedback.setProgress(20)
 
             # ── Parse manual classification ──
@@ -937,9 +937,9 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
 
 
     # ================================================================
-    # Strict Weight Validation
+    # Strict Weight Verification
     # ================================================================
-    def _validate_weights_strict(self, weight_table, feedback):
+    def _verify_weights_strict(self, weight_table, feedback):
         weights = {}
 
         if not weight_table or len(weight_table) % 2 != 0:
@@ -989,9 +989,9 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
         return weights
 
     # ================================================================
-    # Score Range Consistency Validation
+    # Score Range Consistency Verification
     # ================================================================
-    def _validate_score_consistency(self, rules, feedback):
+    def _verify_score_consistency(self, rules, feedback):
         all_scores  = []
         comp_ranges = {}
         for comp, rule_list in rules.items():
@@ -1019,11 +1019,11 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
         feedback.pushInfo(f'  All components consistent [{g_min}, {g_max}]')
 
     # ================================================================
-    # Basic Raster Validation
+    # Basic Raster Verification
     # ================================================================
-    def _validate_raster_basics(self, rasters, feedback):
+    def _verify_raster_basics(self, rasters, feedback):
         """
-        Validate all input rasters and perform full CRS audit.
+        Verify all input rasters and perform full CRS audit.
 
         Steps:
           1. Check layer object is not None
@@ -1181,7 +1181,7 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
         else:
             feedback.pushInfo('  [CRS SUMMARY] All layers share the same CRS — OK')
 
-        feedback.pushInfo('  Basic validation passed')
+        feedback.pushInfo('  Basic verification passed')
         return crs_report
     # ================================================================
     # Auto-Resampling Pipeline
@@ -1189,7 +1189,7 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
     def _auto_resample_rasters(self, rasters, feedback, crs_report=None):
         """
         Resample all input rasters to the LST reference grid.
-        If a layer has a different CRS (detected in _validate_raster_basics),
+        If a layer has a different CRS (detected in _verify_raster_basics),
         GDAL Warp automatically reprojects it to the LST CRS in the same step.
         Resampling method per component:
           NDBI -> Nearest Neighbor  (discrete index, no interpolation)
@@ -1871,7 +1871,7 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
             '=' * 60,
             '- Intervals: left-inclusive, right-exclusive [min, max)',
             '- NDVI is inverse: high vegetation = low risk score',
-            '- All components validated for score-range consistency',
+            '- All components verified for score-range consistency',
             '- Rasters auto-resampled to LST reference grid',
         ]
         return '\n'.join(lines)
