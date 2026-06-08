@@ -101,6 +101,11 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
         <p>Integrates <b>LST · NDBI · NDVI · Population Density</b> with
         automatic resampling and strict validation.</p>
 
+        <p><b>⚠ LST is the reference grid and CRS.</b> All other layers are automatically 
+        resampled and reprojected to match LST resolution, extent, and coordinate system. 
+        LST must have a valid CRS defined — other layers with missing or different CRS 
+        are handled automatically.</p>
+
         <h3>Single Output Folder</h3>
         <p>All outputs are saved inside <b>one folder</b> you choose:</p>
         <ul>
