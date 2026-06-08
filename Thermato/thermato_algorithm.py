@@ -18,7 +18,7 @@
 __author__    = ('Prof.Dr. Albertus Deliar, S.T., M.T., Prof. Ir. Ketut Wikantika, M.Eng, Ph.D., '
                 'Dr. Alfita Puspa Handayani, S.T., M.T., Hifzhan Zhafir Faza, M. Titus Gideon,'
                 'Prasasta Adhitya Gunawan, Muhammad Ar Rayyan R., Rafi Dwi Nugroho')
-__date__      = '2026-06-05'
+__date__      = '2026-01-15'
 __copyright__ = ('(C) 2026 by Prof.Dr. Albertus Deliar, S.T., M.T., Prof. Ir. Ketut Wikantika, M.Eng, Ph.D.,'
                 'Dr. Alfita Puspa Handayani, S.T., M.T., Hifzhan Zhafir Faza, M. Titus Gideon, '
                 'Prasasta Adhitya Gunawan, Muhammad Ar Rayyan Ramadhani, Rafi Dwi Nugroho')
@@ -299,7 +299,7 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
             '&nbsp;&nbsp;&nbsp;&nbsp;risk_class, risk_label, risk_color, area_m2, area_ha<br><br>'
             '<b>report/</b><br>'
             '&nbsp;&nbsp;report.html - Full HTML analysis report<br>'
-            '&nbsp;&nbsp;high_risk_coords.csv - High risk pixel coordinates<br>'
+            '&nbsp;&nbsp;high_risk_coords.csv - Class 5 pixel coordinates<br>'
             '&nbsp;&nbsp;summary.txt - Quick statistics summary<br>'
             '&nbsp;&nbsp;classification_rules.txt - Applied rules documentation<br>'
             '&nbsp;&nbsp;resampling_log.txt - Auto-resampling operations log'
@@ -401,8 +401,8 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
             feedback.setProgress(15)
 
             # ── Basic raster validation ──
-            feedback.pushInfo('\n[VAL] Basic raster validation...')
-            self._validate_raster_basics(rasters, feedback)
+            feedback.pushInfo('\n[VAL] Basic raster validation + CRS audit...')
+            crs_report = self._validate_raster_basics(rasters, feedback)
             feedback.setProgress(20)
 
             # ── Parse manual classification ──
@@ -440,7 +440,7 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
             # ── [1/8] Auto-resample ──
             feedback.pushInfo('\n[1/8] Auto-resampling to reference grid (LST)...')
             if feedback.isCanceled(): raise QgsProcessingException('Cancelled by user.')
-            resampled_paths, resample_log = self._auto_resample_rasters(rasters, feedback)
+            resampled_paths, resample_log = self._auto_resample_rasters(rasters, feedback, crs_report=crs_report)
             feedback.setProgress(35)
 
             # ── [2/8] Read arrays ──
@@ -801,7 +801,7 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
                 cat_names[cls_val] = f'Class {cls_val}'
         band.SetCategoryNames(cat_names)
         
-        # ── Write pixel data (after color table) ──
+        # ── Write pixel data (setelah color table) ──
         out = np.where(np.isnan(arr), 0, arr).astype(np.float32)
         valid_set = set(all_cls_vals)
         out_int = out.astype(np.uint8)
@@ -1017,41 +1017,183 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
     # Basic Raster Validation
     # ================================================================
     def _validate_raster_basics(self, rasters, feedback):
+        """
+        Validate all input rasters and perform full CRS audit.
+
+        Steps:
+          1. Check layer object is not None
+          2. Check GDAL can open the file
+          3. Check RasterCount >= 1
+          4. Extract CRS from each layer
+          5. Compare CRS of NDBI/NDVI/POP against LST reference
+             - If undefined  -> warning, GDAL Warp will use LST CRS
+             - If different  -> warning, reproject will happen in _auto_resample_rasters
+             - If identical  -> info: CRS OK
+          6. Check pixel coverage > 0 (no all-NoData rasters)
+        Returns: dict {name: {'needs_reproject': bool, 'src_crs_wkt': str}}
+        """
+        # ── Step 1: None check ────────────────────────────────────────
         for name, lyr in rasters.items():
             if lyr is None:
                 raise QgsProcessingException(
-                    f"Layer '{name.upper()}' is invalid or not found.")
-
-        ref_ds = gdal.Open(rasters['lst'].source())
-        if ref_ds is None:
-            raise QgsProcessingException('Unable to open LST layer.')
-        ref_ds = None
-
+                    f"Layer '{name.upper()}' is invalid or not found."
+                    f"Please check the input in the dialog.")
+            
+        # ── Step 2 + 3: GDAL open + band count ───────────────────────
         for name, lyr in rasters.items():
-            if name == 'lst':
-                continue
             ds = gdal.Open(lyr.source())
             if ds is None:
-                raise QgsProcessingException(f'Unable to open {name.upper()} layer.')
+                raise QgsProcessingException(
+                    f'[RASTER ERROR] Unable to open {name.upper()} — '
+                    f'file may be corrupt or in an unsupported format.\n'
+                    f'  Path: {lyr.source()}')
             if ds.RasterCount < 1:
                 raise QgsProcessingException(
-                    f'{name.upper()} has no raster bands.'
-                )
-            cur_srs = osr.SpatialReference()
-            cur_srs.ImportFromWkt(ds.GetProjection())
-            if not cur_srs.GetAttrValue('PROJCS') and not cur_srs.GetAttrValue('GEOGCS'):
-                feedback.pushWarning(
-                    f'  {name.upper()}: CRS undefined - LST CRS will be used')
+                    f'[RASTER ERROR] {name.upper()} has no raster bands.')
             ds = None
-            feedback.pushInfo(f'  {name.upper()}: valid')
+
+        # ── Step 4: Extract reference CRS (LST) ──────────────────────
+        ref_ds  = gdal.Open(rasters['lst'].source())
+        ref_wkt = ref_ds.GetProjection()
+        ref_ds  = None
+
+        ref_srs = osr.SpatialReference()
+        ref_srs.ImportFromWkt(ref_wkt)
+        ref_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+
+        ref_crs_name = (
+            ref_srs.GetAttrValue('PROJCS') or
+            ref_srs.GetAttrValue('GEOGCS') or
+            'Unknown CRS'
+        )
+        ref_epsg = ref_srs.GetAuthorityCode(None) or '?'
+        feedback.pushInfo(
+            f'  Reference CRS (LST): {ref_crs_name}  [EPSG:{ref_epsg}]'
+        )
+
+        if not ref_wkt:
+            raise QgsProcessingException(
+                '[CRS ERROR] LST layer has no CRS defined. '
+                'Please assign a CRS to the LST raster before running THERMATO.'
+            )
+
+        # ── Step 5: CRS audit + coverage for each non-LST layer ──────
+        crs_report = {}
+        for name, lyr in rasters.items():
+            if name == 'lst':
+                crs_report['lst'] = {
+                    'needs_reproject': False,
+                    'src_crs_wkt': ref_wkt,
+                    'crs_name': ref_crs_name,
+                    'epsg': ref_epsg
+                }
+                continue
+
+            ds      = gdal.Open(lyr.source())
+            src_wkt = ds.GetProjection()
+
+            # ── Coverage check ────────────────────────────────────────
+            band     = ds.GetRasterBand(1)
+            nd_val   = band.GetNoDataValue()
+            arr_peek = band.ReadAsArray(
+                0, 0,
+                min(ds.RasterXSize, 256),
+                min(ds.RasterYSize, 256)
+            ).astype('float64')
+            if nd_val is not None:
+                import numpy as _np
+                arr_peek[arr_peek == nd_val] = float('nan')
+            valid_cnt = int((_np.isfinite(arr_peek)).sum())
+            if valid_cnt == 0:
+                feedback.pushWarning(
+                    f'  [COVERAGE WARNING] {name.upper()}: first 256×256 sample '
+                    f'contains no valid pixels — raster may be entirely NoData.'
+                )
+            ds = None
+
+            # ── CRS comparison ────────────────────────────────────────
+            if not src_wkt:
+                feedback.pushWarning(
+                    f'  [CRS WARNING] {name.upper()}: CRS is undefined. '
+                    f'GDAL Warp will project it to LST CRS ({ref_crs_name}) '
+                    f'during resampling.'
+                )
+                crs_report[name] = {
+                    'needs_reproject': True,
+                    'src_crs_wkt': '',
+                    'crs_name': 'Undefined',
+                    'epsg': '?'
+                }
+                continue
+
+            src_srs = osr.SpatialReference()
+            src_srs.ImportFromWkt(src_wkt)
+            src_srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+
+            src_crs_name = (
+                src_srs.GetAttrValue('PROJCS') or
+                src_srs.GetAttrValue('GEOGCS') or
+                'Unknown CRS'
+            )
+            src_epsg = src_srs.GetAuthorityCode(None) or '?'
+
+            # IsSame() returns 1 if CRS are equivalent
+            same_crs = bool(src_srs.IsSame(ref_srs))
+
+            if same_crs:
+                feedback.pushInfo(
+                    f'  [CRS OK]   {name.upper()}: {src_crs_name} '
+                    f'[EPSG:{src_epsg}] — matches reference'
+                )
+                crs_report[name] = {
+                    'needs_reproject': False,
+                    'src_crs_wkt': src_wkt,
+                    'crs_name': src_crs_name,
+                    'epsg': src_epsg
+                }
+            else:
+                feedback.pushWarning(
+                    f'  [CRS MISMATCH] {name.upper()}: '
+                    f'{src_crs_name} [EPSG:{src_epsg}]  ≠  '
+                    f'{ref_crs_name} [EPSG:{ref_epsg}]\n'
+                    f'    → Will be reprojected to {ref_crs_name} '
+                    f'during resampling step.'
+                )
+                crs_report[name] = {
+                    'needs_reproject': True,
+                    'src_crs_wkt': src_wkt,
+                    'crs_name': src_crs_name,
+                    'epsg': src_epsg
+                }
+
+        # ── Summary ───────────────────────────────────────────────────
+        n_mismatch = sum(1 for v in crs_report.values() if v['needs_reproject'])
+        if n_mismatch:
+            feedback.pushWarning(
+                f'  [CRS SUMMARY] {n_mismatch} layer(s) have different CRS '
+                f'and will be reprojected automatically.'
+            )
+        else:
+            feedback.pushInfo('  [CRS SUMMARY] All layers share the same CRS — OK')
 
         feedback.pushInfo('  Basic validation passed')
-
+        return crs_report
     # ================================================================
     # Auto-Resampling Pipeline
     # ================================================================
-    def _auto_resample_rasters(self, rasters, feedback):
+    def _auto_resample_rasters(self, rasters, feedback, crs_report=None):
+        """
+        Resample all input rasters to the LST reference grid.
+        If a layer has a different CRS (detected in _validate_raster_basics),
+        GDAL Warp automatically reprojects it to the LST CRS in the same step.
+        Resampling method per component:
+          NDBI -> Nearest Neighbor  (discrete index, no interpolation)
+          NDVI -> Bilinear          (smooth gradient)
+          POP  -> Bilinear          (smooth gradient)
+        """
         import shutil
+        if crs_report is None:
+            crs_report = {}
 
         ref_path = rasters['lst'].source()
         temp_dir = tempfile.mkdtemp(prefix='thermato_')
@@ -1065,16 +1207,26 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
         ref_cols = ref_ds.RasterXSize
         ref_ds   = None
 
+        ref_srs = osr.SpatialReference()
+        ref_srs.ImportFromWkt(ref_proj)
+        ref_crs_name = (
+            ref_srs.GetAttrValue('PROJCS') or
+            ref_srs.GetAttrValue('GEOGCS') or 'Unknown'
+        )
+
         feedback.pushInfo(
             f'  Reference (LST): {ref_rows}x{ref_cols}, '
-            f'res={abs(ref_gt[1]):.6f}x{abs(ref_gt[5]):.6f}'
+            f'res={abs(ref_gt[1]):.6f}x{abs(ref_gt[5]):.6f}  '
+            f'CRS: {ref_crs_name}'
         )
         resample_log.append(f'Reference Grid (LST): {ref_rows}x{ref_cols} pixels')
-        resample_log.append(f'  Resolution: {abs(ref_gt[1]):.6f} x {abs(ref_gt[5]):.6f}')
+        resample_log.append(f'  Resolution : {abs(ref_gt[1]):.6f} x {abs(ref_gt[5]):.6f}')
+        resample_log.append(f'  CRS        : {ref_crs_name}')
         resample_log.append(
-            f'  Extent: [{ref_gt[0]:.2f}, {ref_gt[3]:.2f}, '
-            f'{ref_gt[0] + ref_cols*ref_gt[1]:.2f}, '
-            f'{ref_gt[3] + ref_rows*ref_gt[5]:.2f}]'
+            f'  Extent     : [{ref_gt[0]:.4f}, '
+            f'{ref_gt[3] + ref_rows*ref_gt[5]:.4f}, '
+            f'{ref_gt[0] + ref_cols*ref_gt[1]:.4f}, '
+            f'{ref_gt[3]:.4f}]'
         )
         resample_log.append('')
 
@@ -1087,11 +1239,16 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
         for name, lyr in rasters.items():
             if name == 'lst':
                 continue
+
             input_path  = lyr.source()
             output_path = os.path.join(temp_dir, f'{name}_resampled.tif')
             method, method_name = methods[name]
 
-            feedback.pushInfo(f'  Resampling {name.upper()} ({method_name})...')
+            # Determine if CRS reproject is needed
+            info     = crs_report.get(name, {})
+            needs_rp = info.get('needs_reproject', False)
+            src_crs  = info.get('crs_name', 'Unknown')
+            src_epsg = info.get('epsg', '?')
 
             src_ds   = gdal.Open(input_path)
             src_gt   = src_ds.GetGeoTransform()
@@ -1099,48 +1256,66 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
             src_cols = src_ds.RasterXSize
             src_ds   = None
 
-            same = (
+            # Grid is identical AND no reproject needed -> simple copy
+            grid_same = (
                 abs(abs(src_gt[1]) - abs(ref_gt[1])) < 1e-6 and
                 abs(abs(src_gt[5]) - abs(ref_gt[5])) < 1e-6 and
-                abs(src_gt[0] - ref_gt[0]) < 1e-6 and
-                abs(src_gt[3] - ref_gt[3]) < 1e-6 and
+                abs(src_gt[0]      - ref_gt[0])       < 1e-6 and
+                abs(src_gt[3]      - ref_gt[3])        < 1e-6 and
                 src_rows == ref_rows and src_cols == ref_cols
             )
 
-            if same:
-                feedback.pushInfo(f'    {name.upper()}: matches reference, copying...')
-                shutil.copy2(input_path, output_path)
-                resample_log.append(f'{name.upper()}: No resampling needed')
-            else:
+            if grid_same and not needs_rp:
                 feedback.pushInfo(
-                    f'    {name.upper()}: {src_rows}x{src_cols} -> {ref_rows}x{ref_cols}'
+                    f'  {name.upper()}: grid identical, CRS matches — copying...'
                 )
+                shutil.copy2(input_path, output_path)
+                resample_log.append(f'{name.upper()}: No resampling needed (grid + CRS identical)')
+            else:
+                action_parts = []
+                if needs_rp:
+                    action_parts.append(
+                        f'reproject {src_crs} [EPSG:{src_epsg}] → {ref_crs_name}'
+                    )
+                if not grid_same:
+                    action_parts.append(
+                        f'resample {src_rows}x{src_cols} → {ref_rows}x{ref_cols} ({method_name})'
+                    )
+                action_str = ' + '.join(action_parts)
+                feedback.pushInfo(f'  {name.upper()}: {action_str}')
+
                 wo = gdal.WarpOptions(
                     format='GTiff',
-                    width=ref_cols, height=ref_rows,
+                    width=ref_cols,
+                    height=ref_rows,
                     outputBounds=[
                         ref_gt[0],
                         ref_gt[3] + ref_rows * ref_gt[5],
                         ref_gt[0] + ref_cols * ref_gt[1],
                         ref_gt[3],
                     ],
-                    dstSRS=ref_proj,
+                    dstSRS=ref_proj,         # always set: reprojects if CRS differs
                     resampleAlg=method,
                     creationOptions=['COMPRESS=LZW', 'TILED=YES']
                 )
                 res = gdal.Warp(output_path, input_path, options=wo)
                 if res is None:
-                    raise QgsProcessingException(f'Failed to resample {name.upper()}')
+                    raise QgsProcessingException(
+                        f'[WARP ERROR] Failed to resample/reproject {name.upper()}. '
+                        f'Check that the file is not corrupt and the CRS is readable.'
+                    )
                 res = None
-                resample_log.append(
-                    f'{name.upper()}: {src_rows}x{src_cols} -> {ref_rows}x{ref_cols} '
-                    f'({method_name})'
-                )
+
+                log_line = f'{name.upper()}: {action_str}'
+                if needs_rp:
+                    log_line += f'\n  Source CRS : {src_crs} [EPSG:{src_epsg}]'
+                    log_line += f'\n  Target CRS : {ref_crs_name}'
+                resample_log.append(log_line)
 
             resampled_paths[name] = output_path
             resample_log.append('')
 
-        feedback.pushInfo('  Auto-resampling complete')
+        feedback.pushInfo('  Auto-resampling + reprojection complete')
         return resampled_paths, resample_log
 
     # ================================================================
@@ -1357,7 +1532,7 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
         n_cls = len(all_cls_vals)
 
         cls_rows = ''
-        for cls in all_cls_vals:  # ← iterate all actual class values, not hardcoded 1-5
+        for cls in all_cls_vals:  # ← loop all_cls_vals bukan 1-5
             cnt = class_stats.get(cls, 0)
             pct = 100 * cnt / total_valid if total_valid else 0
             bar = '█' * int(pct / 2)
@@ -1566,7 +1741,7 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
           <td>Polygon with risk_class, risk_label, risk_color, area_m2, area_ha</td></tr>
       <tr><td>report/</td><td>report.html</td><td>This report</td></tr>
       <tr><td>report/</td><td>high_risk_coords.csv</td>
-          <td>f"Class {max_cls_val} pixel coordinates"</td></tr>
+          <td>Class 5 pixel coordinates</td></tr>
       <tr><td>report/</td><td>summary.txt</td><td>Quick statistics</td></tr>
       <tr><td>report/</td><td>classification_rules.txt</td>
           <td>Applied classification rules</td></tr>
