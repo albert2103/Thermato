@@ -18,7 +18,7 @@
 __author__    = ('Prof.Dr. Albertus Deliar, S.T., M.T., Prof. Ir. Ketut Wikantika, M.Eng, Ph.D., '
                 'Dr. Alfita Puspa Handayani, S.T., M.T., Hifzhan Zhafir Faza, M. Titus Gideon,'
                 'Prasasta Adhitya Gunawan, Muhammad Ar Rayyan R., Rafi Dwi Nugroho')
-__date__      = '2026-01-15'
+__date__      = '2026-06-08'
 __copyright__ = ('(C) 2026 by Prof.Dr. Albertus Deliar, S.T., M.T., Prof. Ir. Ketut Wikantika, M.Eng, Ph.D.,'
                 'Dr. Alfita Puspa Handayani, S.T., M.T., Hifzhan Zhafir Faza, M. Titus Gideon, '
                 'Prasasta Adhitya Gunawan, Muhammad Ar Rayyan Ramadhani, Rafi Dwi Nugroho')
