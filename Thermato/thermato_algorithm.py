@@ -389,29 +389,29 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
             feedback.pushInfo(f'  Report        : {report_dir}')
 
             # ── Parse & verify rules ──
-            feedback.pushInfo('\n[VAL] Parsing classification tables...')
+            feedback.pushInfo('\n[PARSE] Parsing classification tables...')
             rules = self._parse_all_tables(tables, feedback)
             feedback.setProgress(5)
 
             # ── Weight verification ──
-            feedback.pushInfo('\n[VAL] Verifying weights (strict 100%)...')
+            feedback.pushInfo('\n[VERIFY] Verifying weights (strict 100%)...')
             weights = self._verify_weights_strict(weight_raw, feedback)
             expr    = self._build_expression(weights)
             feedback.pushInfo(f'  Formula: {expr}')
             feedback.setProgress(10)
 
             # ── Score range consistency ──
-            feedback.pushInfo('\n[VAL] Verifying score range consistency...')
+            feedback.pushInfo('\n[VERIFY] Verifying score range consistency...')
             self._verify_score_consistency(rules, feedback)
             feedback.setProgress(15)
 
             # ── Basic raster verification ──
-            feedback.pushInfo('\n[VAL] Basic raster verification + CRS audit...')
-            crs_report = self._verification_raster_basics(rasters, feedback)
+            feedback.pushInfo('\n[VERIFY] Basic raster verification + CRS audit...')
+            crs_report = self._verify_raster_basics(rasters, feedback)
             feedback.setProgress(20)
 
             # ── Parse manual classification ──
-            feedback.pushInfo('\n[VAL] Parsing manual classification table...')
+            feedback.pushInfo('\n[PARSE] Parsing manual classification table...')
             classify_rules = self._parse_classify_table(classify_raw, feedback)
             feedback.setProgress(22)
 
@@ -937,6 +937,7 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
 
 
     # ================================================================
+    # ================================================================
     # Strict Weight Verification
     # ================================================================
     def _verify_weights_strict(self, weight_table, feedback):
@@ -1026,15 +1027,15 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
         Verify all input rasters and perform full CRS audit.
 
         Steps:
-          1. Check layer object is not None
-          2. Check GDAL can open the file
-          3. Check RasterCount >= 1
+          1. Verify layer object is not None
+          2. Verify GDAL can open the file
+          3. Verify RasterCount >= 1
           4. Extract CRS from each layer
           5. Compare CRS of NDBI/NDVI/POP against LST reference
              - If undefined  -> warning, GDAL Warp will use LST CRS
              - If different  -> warning, reproject will happen in _auto_resample_rasters
-             - If identical  -> info: CRS OK
-          6. Check pixel coverage > 0 (no all-NoData rasters)
+             - If identical  -> CRS verified OK
+          6. Verify pixel coverage > 0 (no all-NoData rasters)
         Returns: dict {name: {'needs_reproject': bool, 'src_crs_wkt': str}}
         """
         # ── Step 1: None check ────────────────────────────────────────
