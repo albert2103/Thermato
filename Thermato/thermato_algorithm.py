@@ -1106,9 +1106,8 @@ class ThermatoAlgorithm(QgsProcessingAlgorithm):
                 min(ds.RasterYSize, 256)
             ).astype('float64')
             if nd_val is not None:
-                import numpy as _np
                 arr_peek[arr_peek == nd_val] = float('nan')
-            valid_cnt = int((_np.isfinite(arr_peek)).sum())
+            valid_cnt = int((np.isfinite(arr_peek)).sum())
             if valid_cnt == 0:
                 feedback.pushWarning(
                     f'  [COVERAGE WARNING] {name.upper()}: first 256×256 sample '
